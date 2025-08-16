@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+:root {
+  --accent: #00ff7e;
+  --accent-soft: #00ff7eaa;
+  --gold: #d0b057;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Comic Neue', cursive;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+  padding: 12px;
+}
+
+body.dark {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+}
+
+body.light {
+  background: linear-gradient(135deg, #f0f8ff, #d4f0ff);
+  color: #333;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 2.5vw + 1rem, 3rem);
+  margin-bottom: 15px;
+  text-shadow: 0 0 8px var(--accent);
+}
+
+.menu {
+  text-align: center;
+}
+
+button {
+  background: var(--gold);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.06s ease, background-color 0.2s ease;
+  box-shadow: 0 0 10px #ffd54f;
+  user-select: none;
+}
+
+button:hover { background: #f4b400; }
+button:active { transform: translateY(1px) scale(0.98); }
+
+button.secondary {
+  background: transparent;
+  border: 2px solid var(--accent);
+  box-shadow: none;
+  color: inherit;
+}
+
+.hidden { display: none !important; }
+
+#game-container {
+  width: min(96vw, 1100px);
+  max-width: 1100px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 0 30px #00ffa3aa;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar .spacer { flex: 1; }
+
+#score-board {
+  font-size: clamp(1rem, 1.2vw + 0.8rem, 1.4rem);
+  color: var(--accent);
+  text-shadow: 0 0 5px var(--accent-soft);
+}
+
+.canvas-wrap {
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+#game-canvas {
+  width: 100%;
+  height: auto;
+  background: #111;
+  border-radius: 12px;
+  box-shadow: inset 0 0 20px var(--accent-soft);
+  display: block;
+}
+
+#info {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  text-align: center;
+}
+
+.controls {
+  display: none;
+  margin-top: 4px;
+}
+
+.controls .row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.controls .dir {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  box-shadow: 0 0 10px var(--accent-soft);
+}
+
+@media (pointer: coarse) {
+  .controls.touch-only { display: block; }
+}
+
+@media (max-width: 480px) {
+  .controls .dir { width: 56px; height: 56px; }
+}

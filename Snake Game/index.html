@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snake Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dark">
+  <div id="main-menu" class="menu">
+    <h1>🐍 Feed the Snake!</h1>
+    <button id="start-btn">🎮 Start Game</button>
+    <button id="rankings-btn">🏆 Rankings</button>
+    <button id="toggle-theme-btn" title="Toggle theme">☀️/🌙</button>
+  </div>
+
+  <div id="game-container" class="hidden">
+    <div class="topbar">
+      <div id="score-board" aria-live="polite">Score: 0</div>
+      <div class="spacer"></div>
+      <button id="back-btn" class="secondary">⬅️ Menu</button>
+    </div>
+
+    <div class="canvas-wrap">
+      <!-- JS sets the canvas size responsively -->
+      <canvas id="game-canvas"></canvas>
+    </div>
+
+    <div id="info">Use Arrow keys / WASD / swipe / on-screen controls</div>
+
+    <div class="controls touch-only" aria-label="Touch controls">
+      <div class="row">
+        <button class="dir" data-dir="UP" aria-label="Up">▲</button>
+      </div>
+      <div class="row">
+        <button class="dir" data-dir="LEFT" aria-label="Left">◀</button>
+        <button class="dir" data-dir="DOWN" aria-label="Down">▼</button>
+        <button class="dir" data-dir="RIGHT" aria-label="Right">▶</button>
+      </div>
+    </div>
+
+    <button id="restart-btn" class="hidden">🔁 Play Again</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
