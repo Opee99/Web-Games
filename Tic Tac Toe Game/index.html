@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Futuristic Tic Tac Toe</title>
+  <style>
+    :root{
+      --bg: #0a0b10;
+      --panel: rgba(255,255,255,0.04);
+      --glass: rgba(255,255,255,0.08);
+      --text: #e8ecff;
+      --muted: #a9b0d0;
+      --accent: #6cf1ff; /* primary neon */
+      --accent2:#8753ff; /* secondary neon */
+      --win: #4cff88;
+      --lose:#ff4c6a;
+      --shadow: 0 0 20px rgba(108,241,255,0.35), 0 0 48px rgba(135,83,255,0.25);
+      --radius: 22px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text); background: radial-gradient(1200px 1200px at 10% -10%, rgba(135,83,255,0.20), transparent 60%),
+                           radial-gradient(900px 900px at 110% 10%, rgba(108,241,255,0.18), transparent 60%),
+                           linear-gradient(180deg, #070810, #0d1020 60%, #070810);
+      display:grid; place-items:center; padding:16px;
+    }
+    .app{width:min(980px, 98vw); display:grid; gap:16px; grid-template-columns: 1fr;}
+    .header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px; background:var(--panel); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius); box-shadow: var(--shadow)}
+    .title{display:flex; gap:12px; align-items:center}
+    .logo{width:42px; height:42px; border-radius:14px; background:linear-gradient(135deg, rgba(108,241,255,0.2), rgba(135,83,255,0.22)); border:1px solid rgba(255,255,255,0.12); display:grid; place-items:center; box-shadow: var(--shadow)}
+    .logo::after{content:"✦"; font-size:20px; color:var(--accent)}
+    h1{font-size: clamp(18px, 2.6vw, 28px); margin:0; letter-spacing:0.6px}
+    .sub{font-size:12px; color:var(--muted)}
+
+    .main{display:grid; grid-template-columns: 1.05fr 0.95fr; gap:16px}
+    @media (max-width: 860px){ .main{grid-template-columns: 1fr} }
+
+    .panel{background:var(--panel); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius); padding:16px; box-shadow: var(--shadow)}
+
+    .board-wrap{display:grid; gap:14px}
+    .status-row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .status{font-weight:600; letter-spacing:0.4px}
+    .pill{padding:8px 12px; border-radius:999px; background:linear-gradient(135deg, rgba(108,241,255,0.12), rgba(135,83,255,0.10)); border:1px solid rgba(255,255,255,0.10)}
+
+    .board{ aspect-ratio:1/1; width:100%; display:grid; grid-template-columns: repeat(3, 1fr); gap:14px }
+    .cell{
+      position:relative; border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.1); display:grid; place-items:center; font-size: clamp(40px, 8.5vw, 84px);
+      color:var(--text); cursor:pointer; user-select:none; transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+      box-shadow: inset 0 0 0 1px rgba(108,241,255,0.06);
+    }
+    .cell:focus{ outline:none; box-shadow: 0 0 0 3px rgba(108,241,255,0.35), inset 0 0 0 1px rgba(108,241,255,0.35) }
+    .cell:hover{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 22px rgba(108,241,255,0.25) }
+    .cell.disabled{ cursor:not-allowed; opacity:0.65 }
+    .cell .mark{ filter: drop-shadow(0 0 6px rgba(108,241,255,0.35)); }
+    .cell.x .mark{ color: var(--accent) }
+    .cell.o .mark{ color: var(--accent2) }
+    .cell.win{ animation: pulse 950ms ease-in-out infinite alternate }
+    @keyframes pulse{ from{ box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 24px rgba(76,255,136,0.18) } to{ box-shadow: 0 8px 26px rgba(0,0,0,0.35), 0 0 46px rgba(76,255,136,0.5) } }
+
+    .controls{display:grid; gap:12px}
+    .row{display:flex; flex-wrap:wrap; gap:10px}
+    .btn, .seg button, select{
+      appearance:none; border:none; color:var(--text); background:linear-gradient(135deg, rgba(108,241,255,0.14), rgba(135,83,255,0.14));
+      padding:10px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.12); font-weight:600; letter-spacing:0.3px; cursor:pointer;
+      transition: transform .06s ease, filter .2s ease, box-shadow .2s ease; box-shadow: var(--shadow)
+    }
+    .btn:hover, .seg button:hover, select:hover{ transform: translateY(-1px) }
+    .btn:active, .seg button:active{ transform: translateY(0) scale(0.98) }
+    .btn.ghost{ background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)) }
+    .seg{ display:flex; padding:6px; gap:6px; border-radius:16px; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.08) }
+    .seg button{ background:transparent; box-shadow:none; padding:8px 12px; border:1px solid transparent }
+    .seg button.active{ background:linear-gradient(135deg, rgba(108,241,255,0.16), rgba(135,83,255,0.16)); border:1px solid rgba(255,255,255,0.18) }
+
+    .side{display:grid; gap:16px}
+    .card{ padding:14px; border-radius:var(--radius); background:var(--panel); border:1px solid rgba(255,255,255,0.06); box-shadow: var(--shadow) }
+    .card h3{ margin:0 0 8px 0; font-size:16px; color:var(--muted); letter-spacing:0.4px }
+    .score{ display:flex; gap:10px; align-items:center; flex-wrap: wrap }
+    .badge{ padding:8px 12px; border-radius:12px; background:linear-gradient(135deg, rgba(108,241,255,0.12), rgba(135,83,255,0.10)); border:1px solid rgba(255,255,255,0.10); font-weight:700 }
+
+    .history{ display:grid; gap:8px; max-height:220px; overflow:auto }
+    .history button{ width:100%; text-align:left }
+    .footer{ text-align:center; color:var(--muted); font-size:12px }
+    .kbd{ font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace; font-size: 11px; padding:2px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04) }
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <div class="header">
+      <div class="title">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Tic Tac Toe</h1>
+          <div class="sub">Play vs Friend or AI</div>
+        </div>
+      </div>
+      <div class="row">
+        <button id="newGameBtn" class="btn">New Game</button>
+        <button id="resetScoreBtn" class="btn ghost">Reset Scores</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- BOARD -->
+      <section class="panel board-wrap" aria-labelledby="boardTitle">
+        <div class="status-row">
+          <div id="status" class="status" aria-live="polite">X to move</div>
+          <div class="pill">Tip: arrows + <span class="kbd">Enter</span></div>
+        </div>
+        <div id="board" class="board" role="grid" aria-label="Tic Tac Toe board">
+          <!-- cells injected -->
+        </div>
+        <div class="row">
+          <button id="undoBtn" class="btn ghost" title="Undo last move">Undo</button>
+          <div class="seg" role="tablist" aria-label="First player">
+            <button id="xStarts" class="active" role="tab" aria-selected="true">X starts</button>
+            <button id="oStarts" role="tab" aria-selected="false">O starts</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SIDE -->
+      <aside class="side">
+        <div class="card">
+          <h3>Mode</h3>
+          <div class="row">
+            <div class="seg" role="tablist" aria-label="Play mode">
+              <button id="modePvP" class="active" role="tab" aria-selected="true">2 Players</button>
+              <button id="modeAI" role="tab" aria-selected="false">Vs AI</button>
+            </div>
+            <select id="difficulty" title="AI difficulty">
+              <option value="easy">AI: Easy</option>
+              <option value="hard" selected>AI: Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Scoreboard</h3>
+          <div class="score">
+            <div class="badge" id="scoreX">X: 0</div>
+            <div class="badge" id="scoreO">O: 0</div>
+            <div class="badge" id="scoreD">Draws: 0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Move History</h3>
+          <div class="history" id="history"></div>
+        </div>
+
+        <div class="card footer">
+          Developed by Mubtasim Fuad Opee.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      board: Array(9).fill(null),
+      current: 'X',
+      gameOver: false,
+      vsAI: false,
+      aiLevel: 'hard',
+      xStarts: true,
+      history: [], // stack of boards
+      scores: { X: 0, O: 0, D: 0 },
+      focus: 0
+    };
+
+    const els = {
+      board: document.getElementById('board'),
+      status: document.getElementById('status'),
+      history: document.getElementById('history'),
+      scoreX: document.getElementById('scoreX'),
+      scoreO: document.getElementById('scoreO'),
+      scoreD: document.getElementById('scoreD'),
+      newGameBtn: document.getElementById('newGameBtn'),
+      resetScoreBtn: document.getElementById('resetScoreBtn'),
+      undoBtn: document.getElementById('undoBtn'),
+      xStarts: document.getElementById('xStarts'),
+      oStarts: document.getElementById('oStarts'),
+      modePvP: document.getElementById('modePvP'),
+      modeAI: document.getElementById('modeAI'),
+      difficulty: document.getElementById('difficulty'),
+    };
+
+    // Initialize board cells
+    function buildCells(){
+      els.board.innerHTML = '';
+      for(let i=0;i<9;i++){
+        const btn = document.createElement('button');
+        btn.className = 'cell';
+        btn.setAttribute('role','gridcell');
+        btn.setAttribute('aria-label', 'Cell '+(i+1));
+        btn.dataset.idx = i;
+        btn.addEventListener('click', ()=> onCell(i));
+        btn.addEventListener('keydown', onCellKey);
+        els.board.appendChild(btn);
+      }
+    }
+
+    function onCellKey(e){
+      const i = Number(this.dataset.idx);
+      const col = i % 3, row = Math.floor(i/3);
+      let target = i;
+      if(e.key==='ArrowRight') target = (col<2)? i+1 : i-2;
+      if(e.key==='ArrowLeft')  target = (col>0)? i-1 : i+2;
+      if(e.key==='ArrowDown')  target = (row<2)? i+3 : i-6;
+      if(e.key==='ArrowUp')    target = (row>0)? i-3 : i+6;
+      if(target!==i){
+        e.preventDefault();
+        els.board.children[target].focus();
+      }
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); onCell(i); }
+    }
+
+    function onCell(i){
+      if(state.gameOver || state.board[i]) return;
+      pushHistory();
+      state.board[i] = state.current;
+      stepAfterMove();
+      if(state.vsAI && !state.gameOver){
+        // AI moves after a brief microtask to let UI update
+        setTimeout(()=>{
+          const move = (state.aiLevel==='easy') ? aiRandom() : aiBestMove();
+          if(move!=null){
+            pushHistory();
+            state.board[move] = state.current;
+            stepAfterMove();
+          }
+        }, 60);
+      }
+    }
+
+    function stepAfterMove(){
+      const win = winner(state.board);
+      if(win){
+        state.gameOver = true;
+        bumpScore(win.player);
+      } else if(full(state.board)){
+        state.gameOver = true;
+        bumpScore('D');
+      } else {
+        state.current = other(state.current);
+      }
+      render();
+    }
+
+    function newGame(){
+      state.board = Array(9).fill(null);
+      state.history = [];
+      state.gameOver = false;
+      state.current = state.xStarts ? 'X' : 'O';
+      render();
+      // If AI goes first
+      if(state.vsAI && state.current === 'O'){
+        setTimeout(()=>{
+          const move = (state.aiLevel==='easy') ? aiRandom() : aiBestMove();
+          if(move!=null){
+            state.board[move] = state.current;
+            stepAfterMove();
+          }
+        }, 80);
+      }
+    }
+
+    function resetScores(){ state.scores={X:0,O:0,D:0}; persist(); render(); }
+    function bumpScore(k){ state.scores[k]++; persist(); }
+
+    function other(p){ return p==='X'?'O':'X'; }
+    function full(b){ return b.every(Boolean); }
+
+    function winner(b){
+      const lines = [ [0,1,2],[3,4,5],[6,7,8], [0,3,6],[1,4,7],[2,5,8], [0,4,8],[2,4,6] ];
+      for(const [a,c,d] of lines){
+        if(b[a] && b[a]===b[c] && b[a]===b[d]) return {player:b[a], line:[a,c,d]};
+      }
+      return null;
+    }
+
+    function scoreBoardText(){
+      return `${state.current}${state.gameOver?' (stopped)':''}`;
+    }
+
+    function render(){
+      // cells
+      for(let i=0;i<9;i++){
+        const el = els.board.children[i];
+        el.className = 'cell';
+        el.disabled = state.gameOver || Boolean(state.board[i]);
+        el.classList.toggle('disabled', el.disabled);
+        el.innerHTML = state.board[i] ? `<span class="mark">${state.board[i]}</span>` : '';
+        if(state.board[i]==='X') el.classList.add('x');
+        if(state.board[i]==='O') el.classList.add('o');
+      }
+      const win = winner(state.board);
+      if(win){ win.line.forEach(i=> els.board.children[i].classList.add('win')); }
+
+      // status
+      if(win){
+        els.status.textContent = `${win.player} wins!`;
+        els.status.style.color = 'var(--win)';
+      } else if(full(state.board)){
+        els.status.textContent = 'Draw';
+        els.status.style.color = 'var(--muted)';
+      } else {
+        els.status.textContent = `${state.current} to move`;
+        els.status.style.color = 'var(--text)';
+      }
+
+      // toggles
+      els.xStarts.classList.toggle('active', state.xStarts);
+      els.oStarts.classList.toggle('active', !state.xStarts);
+      els.modePvP.classList.toggle('active', !state.vsAI);
+      els.modeAI.classList.toggle('active', state.vsAI);
+      els.difficulty.disabled = !state.vsAI;
+
+      // scores
+      els.scoreX.textContent = `X: ${state.scores.X}`;
+      els.scoreO.textContent = `O: ${state.scores.O}`;
+      els.scoreD.textContent = `Draws: ${state.scores.D}`;
+
+      // history list
+      els.history.innerHTML = '';
+      state.history.slice().reverse().forEach((h, idx)=>{
+        const moveNo = state.history.length - idx;
+        const btn = document.createElement('button');
+        btn.className='btn ghost';
+        btn.textContent = `Undo to move ${moveNo-1}`;
+        btn.addEventListener('click', ()=> restoreHistory(moveNo));
+        els.history.appendChild(btn);
+      });
+
+      // focus management
+      const nextIdx = nextEmptyIndex();
+      if(nextIdx!=null) els.board.children[nextIdx].setAttribute('tabindex','0');
+      for(let i=0;i<9;i++) if(i!==nextIdx) els.board.children[i].setAttribute('tabindex','-1');
+    }
+
+    function nextEmptyIndex(){
+      for(let i=0;i<9;i++) if(!state.board[i]) return i; return 0;
+    }
+
+    // History/Undo
+    function pushHistory(){ state.history.push(state.board.slice()); }
+    function restoreHistory(steps){
+      // steps: how many snapshots from the end to go back to
+      const targetIdx = state.history.length - steps;
+      if(targetIdx < 0) return;
+      state.board = state.history[targetIdx].slice();
+      state.history = state.history.slice(0, targetIdx);
+      state.gameOver = false;
+      // Recompute current player from counts
+      const xCount = state.board.filter(v=>v==='X').length;
+      const oCount = state.board.filter(v=>v==='O').length;
+      state.current = (xCount===oCount) ? (state.xStarts?'X':'O') : (xCount>oCount?'O':'X');
+      render();
+    }
+
+    els.undoBtn.addEventListener('click', ()=> restoreHistory(1));
+
+    // Mode & options
+    els.xStarts.addEventListener('click', ()=>{ state.xStarts=true; newGame(); });
+    els.oStarts.addEventListener('click', ()=>{ state.xStarts=false; newGame(); });
+    els.modePvP.addEventListener('click', ()=>{ state.vsAI=false; render(); newGame(); persist(); });
+    els.modeAI.addEventListener('click', ()=>{ state.vsAI=true; render(); newGame(); persist(); });
+    els.difficulty.addEventListener('change', (e)=>{ state.aiLevel = e.target.value; persist(); });
+
+    els.newGameBtn.addEventListener('click', newGame);
+    els.resetScoreBtn.addEventListener('click', resetScores);
+
+    // AI
+    function aiRandom(){
+      const empties = state.board.map((v,i)=> v?null:i).filter(v=>v!==null);
+      if(!empties.length) return null;
+      return empties[Math.floor(Math.random()*empties.length)];
+    }
+
+    function aiBestMove(){
+      const ai = state.current; // AI plays as current
+      let best = -Infinity, move = null;
+      for(let i=0;i<9;i++) if(!state.board[i]){
+        state.board[i] = ai;
+        const val = minimax(state.board, false, ai, other(ai));
+        state.board[i] = null;
+        if(val>best){ best=val; move=i; }
+      }
+      return move;
+    }
+
+    function minimax(board, isMax, ai, human){
+      const w = winner(board);
+      if(w){ return (w.player===ai) ? 10 : -10; }
+      if(full(board)) return 0;
+      let best = isMax? -Infinity : Infinity;
+      for(let i=0;i<9;i++) if(!board[i]){
+        board[i] = isMax? ai : human;
+        const score = minimax(board, !isMax, ai, human);
+        board[i] = null;
+        best = isMax? Math.max(best, score) : Math.min(best, score);
+      }
+      // Add slight preference for center & corners to speed decision and variety
+      if(isMax && best===0){ // neutral position tie breaker
+        if(!board[4]) best += 0.1;
+      }
+      return best;
+    }
+
+    // Persistence
+    function persist(){
+      try{
+        localStorage.setItem('ttt_scores', JSON.stringify(state.scores));
+        localStorage.setItem('ttt_opts', JSON.stringify({vsAI: state.vsAI, aiLevel: state.aiLevel, xStarts: state.xStarts}));
+      }catch(e){}
+    }
+    function loadPersist(){
+      try{
+        const s = JSON.parse(localStorage.getItem('ttt_scores'));
+        if(s) state.scores = s;
+        const o = JSON.parse(localStorage.getItem('ttt_opts'));
+        if(o){ state.vsAI = !!o.vsAI; state.aiLevel = o.aiLevel||'hard'; state.xStarts = (o.xStarts!==false); }
+      }catch(e){}
+    }
+
+    // Boot
+    loadPersist();
+    buildCells();
+    newGame();
+    render();
+  </script>
+</body>
+</html>
